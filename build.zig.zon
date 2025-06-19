@@ -1,7 +1,7 @@
 .{
     .name = .zsdl3t,
     .version = "0.0.0",
-    .fingerprint = 0x98cbcae4a41b6e4e,
+    .fingerprint = 0xf383971ed32cdfc4,
     .minimum_zig_version = "0.14.1",
 
     .dependencies = .{
