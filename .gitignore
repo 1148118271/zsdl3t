@@ -1,0 +1,104 @@
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Linux
+*~
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+*.db
+
+# Compiled files
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+*.class
+*.pyc
+*.pyo
+*.swp
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-*
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+.env
+*.egg-info/
+
+# Rust
+target/
+Cargo.lock
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+
+# C/C++
+*.exe
+*.out
+*.a
+*.lib
+*.lo
+*.la
+*.lai
+*.dll
+*.dylib
+*.so
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Zig
+.zig-cache/
+zig-out/
+
+# Go
+bin/
+pkg/
+*.exe
+
+# .NET
+bin/
+obj/
+
+# Backup / temp files
+*.bak
+*.tmp
+*.temp
+*.old
+*.orig
+
+# Editor swap files
+*.swp
+*.swo
+*.swn
+
+
+.vscode/
+.history/
+
+
+.idea/
+*.iml
+out/
