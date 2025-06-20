@@ -1,5 +1,6 @@
 const std = @import("std");
 const sdl = @import("../c.zig").sdl;
+const Widget = @import("widget.zig").Widget;
 
 pub const Window = @This();
 
@@ -15,7 +16,11 @@ event: sdl.SDL_Event,
 running: bool,
 backgroundColor: sdl.SDL_Color,
 
-pub fn init(title: []const u8, w: i32, h: i32) Window.Error!Window {
+// allocator: std.mem.Allocator,
+
+widgets: std.ArrayList(Widget),
+
+pub fn init(allocator: std.mem.Allocator, title: []const u8, w: i32, h: i32) Window.Error!Window {
     std.debug.print("create......\n", .{});
     if (!sdl.SDL_Init(sdl.SDL_INIT_VIDEO)) {
         std.debug.print("SDL_Init Error: {s}\n", .{sdl.SDL_GetError()});
@@ -32,6 +37,7 @@ pub fn init(title: []const u8, w: i32, h: i32) Window.Error!Window {
         sdl.SDL_Quit();
         return Window.Error.CreateRenderer;
     }
+
     return Window{
         .window = win,
         .renderer = render,
@@ -43,16 +49,17 @@ pub fn init(title: []const u8, w: i32, h: i32) Window.Error!Window {
             .b = 255,
             .a = 255,
         },
+        .widgets = std.ArrayList(Widget).init(allocator),
     };
 }
 
-pub fn run(window: *Window) !void {
+pub fn run(this: *Window) !void {
     std.debug.print("run......\n", .{});
-    while (window.running) {
-        _ = sdl.SDL_WaitEvent(&window.event);
-        switch (window.event.type) {
+    while (this.running) {
+        _ = sdl.SDL_WaitEvent(&this.event);
+        switch (this.event.type) {
             sdl.SDL_EVENT_QUIT => {
-                window.running = false;
+                this.running = false;
                 std.debug.print("quit......\n", .{});
                 break;
             },
@@ -62,26 +69,29 @@ pub fn run(window: *Window) !void {
             // },
             else => {},
         }
-        window.renderColor();
-        _ = sdl.SDL_RenderPresent(window.renderer);
+        this.renderColor();
+        for (this.widgets.items) |widget| {
+            widget.draw();
+        }
+        _ = sdl.SDL_RenderPresent(this.renderer);
         // SDL_Delay(16);
     }
 }
 
-pub fn close(window: *Window) void {
+pub fn close(this: *Window) void {
     std.debug.print("close......\n", .{});
-    sdl.SDL_DestroyRenderer(window.renderer);
-    sdl.SDL_DestroyWindow(window.window);
+    sdl.SDL_DestroyRenderer(this.renderer);
+    sdl.SDL_DestroyWindow(this.window);
     sdl.SDL_Quit();
 }
 
-fn renderColor(window: *Window) void {
+fn renderColor(this: *Window) void {
     _ = sdl.SDL_SetRenderDrawColor(
-        window.renderer,
-        window.backgroundColor.r,
-        window.backgroundColor.g,
-        window.backgroundColor.b,
-        window.backgroundColor.a,
+        this.renderer,
+        this.backgroundColor.r,
+        this.backgroundColor.g,
+        this.backgroundColor.b,
+        this.backgroundColor.a,
     );
-    _ = sdl.SDL_RenderClear(window.renderer);
+    _ = sdl.SDL_RenderClear(this.renderer);
 }
