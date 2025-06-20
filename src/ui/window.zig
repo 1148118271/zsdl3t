@@ -15,7 +15,7 @@ event: sdl.SDL_Event,
 running: bool,
 backgroundColor: sdl.SDL_Color,
 
-pub fn create(title: []const u8, w: i32, h: i32) Window.Error!Window {
+pub fn init(title: []const u8, w: i32, h: i32) Window.Error!Window {
     std.debug.print("create......\n", .{});
     if (!sdl.SDL_Init(sdl.SDL_INIT_VIDEO)) {
         std.debug.print("SDL_Init Error: {s}\n", .{sdl.SDL_GetError()});
@@ -38,9 +38,9 @@ pub fn create(title: []const u8, w: i32, h: i32) Window.Error!Window {
         .running = true,
         .event = undefined,
         .backgroundColor = sdl.SDL_Color{
-            .r = 0,
-            .g = 0,
-            .b = 0,
+            .r = 255,
+            .g = 255,
+            .b = 255,
             .a = 255,
         },
     };
@@ -56,9 +56,14 @@ pub fn run(window: *Window) !void {
                 std.debug.print("quit......\n", .{});
                 break;
             },
-            sdl.SDL_EVENT_WINDOW_RESIZED => {},
+            // sdl.SDL_EVENT_WINDOW_RESIZED => {
+            //     std.debug.print("RESIZED......\n", .{});
+            //     window.renderColor();
+            // },
             else => {},
         }
+        window.renderColor();
+        _ = sdl.SDL_RenderPresent(window.renderer);
         // SDL_Delay(16);
     }
 }
@@ -68,4 +73,15 @@ pub fn close(window: *Window) void {
     sdl.SDL_DestroyRenderer(window.renderer);
     sdl.SDL_DestroyWindow(window.window);
     sdl.SDL_Quit();
+}
+
+fn renderColor(window: *Window) void {
+    _ = sdl.SDL_SetRenderDrawColor(
+        window.renderer,
+        window.backgroundColor.r,
+        window.backgroundColor.g,
+        window.backgroundColor.b,
+        window.backgroundColor.a,
+    );
+    _ = sdl.SDL_RenderClear(window.renderer);
 }
