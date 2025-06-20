@@ -1,8 +1,8 @@
 const std = @import("std");
-const window = @import("ui/window.zig");
+const ui = @import("./ui.zig");
 
 pub fn main() !void {
-    try window.create();
-    window.run();
+    var window: ui.Window = try ui.Window.create("mian", 1000, 800);
+    try window.run();
     window.close();
 }
