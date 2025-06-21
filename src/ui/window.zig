@@ -87,6 +87,16 @@ pub fn close(this: *Window) void {
     sdl.SDL_Quit();
 }
 
+pub fn getSize(this: *Window) struct { w: i32, h: i32 } {
+    var w: i32 = undefined;
+    var h: i32 = undefined;
+    _ = sdl.SDL_GetWindowSize(this.window, &w, &h);
+    return .{
+        .w = w,
+        .h = h,
+    };
+}
+
 fn renderColor(this: *Window) void {
     _ = sdl.SDL_SetRenderDrawColor(
         this.renderer,
