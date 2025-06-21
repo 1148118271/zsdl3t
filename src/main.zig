@@ -6,7 +6,7 @@ pub fn main() !void {
     defer arena.deinit();
     const allocator = arena.allocator();
     var window: ui.Window = try ui.Window.init(allocator, "mian", 1000, 800);
-    var term = ui.Terminal.init(window.renderer, &window.event);
+    var term = ui.Terminal.init(window.renderer, &window.event, .{ .x = 200, .y = 200, .w = 400, .h = 400 });
     try window.widgets.append(term.asWidget());
     try window.run();
     window.close();

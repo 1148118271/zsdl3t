@@ -1,6 +1,10 @@
 const std = @import("std");
 const sdl = @import("../c.zig").sdl;
+const types = @import("types.zig");
+
 const Widget = @import("widget.zig").Widget;
+
+const Color = types.Color;
 
 pub const Window = @This();
 
@@ -14,9 +18,7 @@ window: ?*sdl.SDL_Window,
 renderer: ?*sdl.SDL_Renderer,
 event: sdl.SDL_Event,
 running: bool,
-backgroundColor: sdl.SDL_Color,
-
-// allocator: std.mem.Allocator,
+backgroundColor: Color,
 
 widgets: std.ArrayList(Widget),
 
@@ -43,7 +45,7 @@ pub fn init(allocator: std.mem.Allocator, title: []const u8, w: i32, h: i32) Win
         .renderer = render,
         .running = true,
         .event = undefined,
-        .backgroundColor = sdl.SDL_Color{
+        .backgroundColor = Color{
             .r = 255,
             .g = 255,
             .b = 255,
