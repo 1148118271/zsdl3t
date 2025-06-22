@@ -1,15 +1,13 @@
 const std = @import("std");
 const sdl = @import("../c.zig").sdl;
 const types = @import("types.zig");
-
 const Widget = @import("widget.zig").Widget;
-
 const Color = types.Color;
-
 pub const Window = @This();
 
 pub const Error = error{
     SdlInit,
+    TtfInit,
     CreateWindow,
     CreateRenderer,
 };
@@ -28,6 +26,10 @@ pub fn init(allocator: std.mem.Allocator, title: []const u8, w: i32, h: i32) Win
         std.debug.print("SDL_Init Error: {s}\n", .{sdl.SDL_GetError()});
         return Window.Error.SdlInit;
     }
+    if (!sdl.TTF_Init()) {
+        std.debug.print("SDL_Init Error: {s}\n", .{sdl.SDL_GetError()});
+        return Window.Error.TtfInit;
+    }
     const win: ?*sdl.SDL_Window = sdl.SDL_CreateWindow(title.ptr, w, h, sdl.SDL_WINDOW_RESIZABLE);
     if (win == null) {
         std.debug.print("SDL_CreateWindow Error: {s}\n", .{sdl.SDL_GetError()});
@@ -36,6 +38,7 @@ pub fn init(allocator: std.mem.Allocator, title: []const u8, w: i32, h: i32) Win
     }
     const render: ?*sdl.SDL_Renderer = sdl.SDL_CreateRenderer(win, null);
     if (render == null) {
+        std.debug.print("SDL_Renderer Error: {s}\n", .{sdl.SDL_GetError()});
         sdl.SDL_Quit();
         return Window.Error.CreateRenderer;
     }
@@ -45,7 +48,7 @@ pub fn init(allocator: std.mem.Allocator, title: []const u8, w: i32, h: i32) Win
         .renderer = render,
         .running = true,
         .event = undefined,
-        .backgroundColor = Color{
+        .backgroundColor = sdl.SDL_Color{
             .r = 255,
             .g = 255,
             .b = 255,
@@ -63,12 +66,13 @@ pub fn run(this: *Window) !void {
             sdl.SDL_EVENT_QUIT => {
                 this.running = false;
                 std.debug.print("quit......\n", .{});
-                break;
             },
-            // sdl.SDL_EVENT_WINDOW_RESIZED => {
-            //     std.debug.print("RESIZED......\n", .{});
-            //     window.renderColor();
-            // },
+            sdl.SDL_EVENT_WINDOW_RESIZED => {
+                for (this.widgets.items) |widget| {
+                    widget.resize();
+                }
+                _ = sdl.SDL_RenderPresent(this.renderer);
+            },
             else => {},
         }
         this.renderColor();
@@ -85,6 +89,8 @@ pub fn close(this: *Window) void {
     sdl.SDL_DestroyRenderer(this.renderer);
     sdl.SDL_DestroyWindow(this.window);
     sdl.SDL_Quit();
+    // free widget
+    this.widgets.deinit();
 }
 
 pub fn getSize(this: *Window) struct { w: i32, h: i32 } {
