@@ -15,7 +15,7 @@ font: ?*sdl.TTF_Font,
 rect: FRect,
 oldRatio: FRect,
 backgroundColor: Color,
-lines: std.ArrayList([*:0]const u8),
+lines: std.ArrayList([]const u8),
 
 pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Terminal {
     const ws = window.getSize();
@@ -24,9 +24,9 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
     const rx = rect.x / @as(f32, @floatFromInt(ws.w));
     const ry = rect.y / @as(f32, @floatFromInt(ws.h));
 
-    var lines = std.ArrayList([*:0]const u8).init(allocator);
-    try lines.append("Last login: Sun Jun 22 14:19:54 on ttys002");
-    try lines.append("user@user ~ %");
+    var lines = std.ArrayList([]const u8).init(allocator);
+    try lines.append("gggg123");
+    try lines.append("2333");
 
     const fontPath = comptime switch (builtin.os.tag) {
         .windows => "C:/Windows/Fonts/msyh.ttc",
@@ -87,34 +87,31 @@ pub fn draw(this: *Terminal) void {
         .b = 251,
         .a = 255,
     };
-    const text: [*:0]const u8 = "德玛西亚永世长存！";
-    const surface = sdl.TTF_RenderText_Blended(
-        this.font,
-        text,
-        std.mem.len(text),
-        fg,
-    );
-    const texture = sdl.SDL_CreateTextureFromSurface(
-        this.window.renderer,
-        surface,
-    );
-    // _ = sdl.SDL_SetTextureScaleMode(texture, sdl.SDL_SCALEMODE_NEAREST);
-    defer {
-        sdl.SDL_DestroyTexture(texture);
-        sdl.SDL_DestroySurface(surface);
+    for (this.lines.items) |text| {
+        std.debug.print("text: {s}", .{text});
+        const surface = sdl.TTF_RenderText_Blended(
+            this.font,
+            text.ptr,
+            text.len,
+            fg,
+        );
+        const texture = sdl.SDL_CreateTextureFromSurface(
+            this.window.renderer,
+            surface,
+        );
+        defer {
+            sdl.SDL_DestroyTexture(texture);
+            sdl.SDL_DestroySurface(surface);
+        }
+
+        const textRect = FRect{
+            .x = this.rect.x + 1,
+            .y = this.rect.y + 1,
+            .w = @floatFromInt(texture.*.w),
+            .h = @floatFromInt(texture.*.h),
+        };
+        _ = sdl.SDL_RenderTexture(this.window.renderer, texture, null, &textRect);
     }
-
-    const textRect = FRect{
-        .x = this.rect.x + 1,
-        .y = this.rect.y + 1,
-        .w = @floatFromInt(texture.*.w),
-        .h = @floatFromInt(texture.*.h),
-    };
-    // textRe
-    // SDL_FRect textRect = { lineStyle_.x_, lineStyle_.y_, (float)texture->w, (float )texture->h };
-    _ = sdl.SDL_RenderTexture(this.window.renderer, texture, null, &textRect);
-
-    // std.debug.print("terminal....\n", .{});
 }
 
 pub fn asWidget(this: *Terminal) Widget {
