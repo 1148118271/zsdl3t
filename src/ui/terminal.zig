@@ -28,14 +28,14 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
     try lines.append("user@user ~ %");
 
     const fontPath = comptime switch (builtin.os.tag) {
-        // .windows => std.debug.print("Compiling for Windows\n", .{}),
+        .windows => "C:/Windows/Fonts/msyh.ttc",
         .macos => "/System/Library/Fonts/PingFang.ttc",
         else => {
             @panic("unknown os!");
         },
     };
 
-    const font = sdl.TTF_OpenFont(fontPath, 50);
+    const font = sdl.TTF_OpenFont(fontPath, 30);
 
     if (font == null) {
         std.debug.print("TTF_OpenFont Error: {s}\n", .{sdl.SDL_GetError()});
@@ -85,7 +85,7 @@ pub fn draw(this: *Terminal) void {
         .b = 251,
         .a = 255,
     };
-    const text: [*:0]const u8 = "1233";
+    const text: [*:0]const u8 = "德玛西亚永世长存！";
     const surface = sdl.TTF_RenderText_Blended(
         this.font,
         text,
