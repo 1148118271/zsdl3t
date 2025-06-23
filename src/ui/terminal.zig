@@ -6,6 +6,7 @@ const Widget = @import("widget.zig").Widget;
 const Window = @import("window.zig").Window;
 const FRect = types.FRect;
 const Color = types.Color;
+const Event = types.Event;
 
 pub const Terminal = @This();
 
@@ -67,6 +68,7 @@ pub fn resize(this: *Terminal) void {
 }
 
 pub fn draw(this: *Terminal) void {
+    handleType(this.window.event);
     _ = sdl.SDL_SetRenderDrawColor(
         this.window.renderer,
         this.backgroundColor.r,
@@ -128,4 +130,10 @@ pub fn close(this: *Terminal) void {
         sdl.TTF_CloseFont(this.font);
     }
     this.lines.deinit();
+}
+
+fn handleType(event: Event) void {
+    switch (event.type) {
+        else => {},
+    }
 }

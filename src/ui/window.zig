@@ -3,6 +3,7 @@ const sdl = @import("../c.zig").sdl;
 const types = @import("types.zig");
 const Widget = @import("widget.zig").Widget;
 const Color = types.Color;
+const Event = types.Event;
 pub const Window = @This();
 
 pub const Error = error{
@@ -14,7 +15,7 @@ pub const Error = error{
 
 window: ?*sdl.SDL_Window,
 renderer: ?*sdl.SDL_Renderer,
-event: sdl.SDL_Event,
+event: Event,
 running: bool,
 backgroundColor: Color,
 
