@@ -16,6 +16,7 @@ rect: FRect,
 oldRatio: FRect,
 backgroundColor: Color,
 lines: std.ArrayList([]const u8),
+lineSpace: f32,
 
 pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Terminal {
     const ws = window.getSize();
@@ -25,8 +26,9 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
     const ry = rect.y / @as(f32, @floatFromInt(ws.h));
 
     var lines = std.ArrayList([]const u8).init(allocator);
-    try lines.append("gggg 123");
-    try lines.append("2333");
+    try lines.append("PS C:\\Users\\86176> 123");
+    try lines.append("123");
+    try lines.append("PS C:\\Users\\86176>");
 
     const fontPath = comptime switch (builtin.os.tag) {
         .windows => "C:/Windows/Fonts/msyh.ttc",
@@ -36,8 +38,7 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
         },
     };
 
-    const font = sdl.TTF_OpenFont(fontPath, 30);
-
+    const font = sdl.TTF_OpenFont(fontPath, 18);
     if (font == null) {
         std.debug.print("TTF_OpenFont Error: {s}\n", .{sdl.SDL_GetError()});
         // TODO panic
@@ -55,6 +56,7 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
             .a = 255,
         },
         .lines = lines,
+        .lineSpace = 2.0,
     };
 }
 
@@ -82,18 +84,19 @@ pub fn draw(this: *Terminal) void {
     );
 
     const fg = Color{
-        .r = 169,
-        .g = 219,
-        .b = 251,
+        .r = 204,
+        .g = 204,
+        .b = 204,
         .a = 255,
     };
+    var fontY = this.rect.x + 1;
     for (this.lines.items) |text| {
-        std.debug.print("text: {s}", .{text});
-        const surface = sdl.TTF_RenderText_Blended(
+        const surface = sdl.TTF_RenderText_Blended_Wrapped(
             this.font,
             text.ptr,
             text.len,
             fg,
+            @intFromFloat(this.rect.w),
         );
         const texture = sdl.SDL_CreateTextureFromSurface(
             this.window.renderer,
@@ -103,14 +106,14 @@ pub fn draw(this: *Terminal) void {
             sdl.SDL_DestroyTexture(texture);
             sdl.SDL_DestroySurface(surface);
         }
-
         const textRect = FRect{
             .x = this.rect.x + 1,
-            .y = this.rect.y + 1,
+            .y = fontY,
             .w = @floatFromInt(texture.*.w),
             .h = @floatFromInt(texture.*.h),
         };
         _ = sdl.SDL_RenderTexture(this.window.renderer, texture, null, &textRect);
+        fontY += textRect.h + this.lineSpace;
     }
 }
 
