@@ -4,14 +4,7 @@
     .fingerprint = 0xf383971ed32cdfc4,
     .minimum_zig_version = "0.14.1",
 
-    .dependencies = .{
-        .sdl = .{
-            .path = "./packages/SDL3",
-        },
-        .SDL_ttf = .{
-            .path = "./packages/SDL3_ttf",
-        },
-    },
+    .dependencies = .{},
 
     // Specifies the set of files and directories that are included in this package.
     // Only files and directories listed here are included in the `hash` that

@@ -15,28 +15,27 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
     });
 
-    const sdl_dep = b.dependency("sdl", .{
-        .target = target,
-        .optimize = optimize,
-        .preferred_linkage = .static,
-    });
-    const sdl_lib = sdl_dep.artifact("SDL3");
-    // const sdl_test_lib = sdl_dep.artifact("SDL3_test");
+    const libPath = "libs/SDL3";
+    const osPath = switch (target.result.os.tag) {
+        .windows => "/windows",
+        else => {
+            @panic("Unsupported operating system");
+        },
+    };
+    const archPath = switch (target.result.cpu.arch) {
+        .x86 => "/x86",
+        .x86_64 => "/x64",
+        else => {
+            @panic("Unsupported architecture");
+        },
+    };
 
-    exe.linkLibrary(sdl_lib);
-    exe.addIncludePath(b.path("./packages/SDL3/include/"));
+    exe.addLibraryPath(b.path(libPath ++ osPath ++ archPath));
+    exe.linkSystemLibrary("SDL3");
+    exe.linkSystemLibrary("SDL3_ttf");
+    exe.linkLibC();
 
-    const sdl_ttf_dep = b.dependency("SDL_ttf", .{
-        .target = target,
-        .optimize = optimize,
-        .preferred_linkage = .static,
-    });
-
-    const sdl_ttf_lib = sdl_ttf_dep.artifact("SDL3_ttf");
-    exe.linkLibrary(sdl_ttf_lib);
-    exe.addIncludePath(b.path("./packages/SDL3_ttf/include/"));
-    // exe.linkLibrary(sdl_dep.artifact("SDL3_test")); // 可选，如果你用到测试库
-    // b.addModule("sdl", sdl_dep.module("sdl"));
+    exe.addIncludePath(b.path("./include/"));
 
     b.installArtifact(exe);
 

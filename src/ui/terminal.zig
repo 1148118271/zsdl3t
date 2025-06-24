@@ -25,7 +25,7 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
     const ry = rect.y / @as(f32, @floatFromInt(ws.h));
 
     var lines = std.ArrayList([]const u8).init(allocator);
-    try lines.append("gggg123");
+    try lines.append("gggg 123");
     try lines.append("2333");
 
     const fontPath = comptime switch (builtin.os.tag) {
