@@ -15,28 +15,34 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
     });
 
-    const libPath = "libs/SDL3";
-    const osPath = switch (target.result.os.tag) {
-        .windows => "/windows",
+    switch (target.result.os.tag) {
+        .windows => {
+            const path = "libs/SDL3/windows/";
+            const archPath = switch (target.result.cpu.arch) {
+                .x86 => "x86",
+                .x86_64 => "x64",
+                else => {
+                    @panic("window unsupported architecture");
+                },
+            };
+            exe.addLibraryPath(b.path(path ++ archPath));
+            exe.linkSystemLibrary("SDL3");
+            exe.linkSystemLibrary("SDL3_ttf");
+        },
+        .macos => {
+            const path = "libs/SDL3/macos/";
+            exe.addFrameworkPath(b.path(path));
+            exe.linkFramework("SDL3");
+            exe.linkFramework("SDL3_ttf");
+            exe.addRPath(b.path(path));
+        },
         else => {
             @panic("Unsupported operating system");
         },
-    };
-    const archPath = switch (target.result.cpu.arch) {
-        .x86 => "/x86",
-        .x86_64 => "/x64",
-        else => {
-            @panic("Unsupported architecture");
-        },
-    };
+    }
 
-    exe.addLibraryPath(b.path(libPath ++ osPath ++ archPath));
-    exe.linkSystemLibrary("SDL3");
-    exe.linkSystemLibrary("SDL3_ttf");
     exe.linkLibC();
-
-    exe.addIncludePath(b.path("./include/"));
-
+    exe.addIncludePath(b.path("include"));
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
