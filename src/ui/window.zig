@@ -1,5 +1,5 @@
 const std = @import("std");
-const sdl = @import("../c.zig").sdl;
+const sdl = @import("sdl.zig").sdl;
 const types = @import("types.zig");
 const Widget = @import("widget.zig").Widget;
 const Color = types.Color;
@@ -69,10 +69,10 @@ pub fn run(this: *Window) !void {
                 std.debug.print("quit......\n", .{});
             },
             sdl.SDL_EVENT_WINDOW_RESIZED => {
-                for (this.widgets.items) |widget| {
-                    widget.resize();
-                }
-                _ = sdl.SDL_RenderPresent(this.renderer);
+                // for (this.widgets.items) |widget| {
+                //     widget.resize();
+                // }
+                // _ = sdl.SDL_RenderPresent(this.renderer);
             },
             else => {},
         }
@@ -97,11 +97,15 @@ pub fn close(this: *Window) void {
 pub fn getSize(this: *Window) struct { w: i32, h: i32 } {
     var w: i32 = undefined;
     var h: i32 = undefined;
-    _ = sdl.SDL_GetWindowSizeInPixels(this.window, &w, &h);
+    _ = sdl.SDL_GetWindowSizeInPixelsInPixels(this.window, &w, &h);
     return .{
         .w = w,
         .h = h,
     };
+}
+
+pub fn getPixelDensity(this: *Window) f32 {
+    return sdl.SDL_GetWindowPixelDensity(this.window);
 }
 
 fn renderColor(this: *Window) void {

@@ -1,6 +1,6 @@
 const std = @import("std");
 const builtin = @import("builtin");
-const sdl = @import("../c.zig").sdl;
+const sdl = @import("sdl.zig").sdl;
 const types = @import("types.zig");
 const Widget = @import("widget.zig").Widget;
 const Window = @import("window.zig").Window;
@@ -13,17 +13,12 @@ pub const Terminal = @This();
 window: *Window,
 font: ?*sdl.TTF_Font,
 rect: FRect,
-oldRatio: FRect,
 backgroundColor: Color,
 lines: std.ArrayList([]const u8),
 lineSpace: f32,
 
 pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Terminal {
-    const ws = window.getSize();
-    const rw = rect.w / @as(f32, @floatFromInt(ws.w));
-    const rh = rect.h / @as(f32, @floatFromInt(ws.h));
-    const rx = rect.x / @as(f32, @floatFromInt(ws.w));
-    const ry = rect.y / @as(f32, @floatFromInt(ws.h));
+    const pixelDensity = window.getPixelDensity();
 
     var lines = std.ArrayList([]const u8).init(allocator);
     try lines.append("PS C:\\Users\\86176> 123");
@@ -38,17 +33,22 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
         },
     };
 
-    const font = sdl.TTF_OpenFont(fontPath, 18);
+    const font = sdl.TTF_OpenFont(fontPath, 18 * pixelDensity);
     if (font == null) {
         std.debug.print("TTF_OpenFont Error: {s}\n", .{sdl.SDL_GetError()});
         // TODO panic
         @panic("font is null!");
     }
+
     return Terminal{
         .window = window,
         .font = font,
-        .rect = rect,
-        .oldRatio = .{ .x = rx, .y = ry, .w = rw, .h = rh },
+        .rect = .{
+            .x = rect.x * pixelDensity,
+            .y = rect.y * pixelDensity,
+            .w = rect.w * pixelDensity,
+            .h = rect.h * pixelDensity,
+        },
         .backgroundColor = .{
             .r = 24,
             .g = 24,
@@ -60,13 +60,13 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
     };
 }
 
-pub fn resize(this: *Terminal) void {
-    const ws = this.window.getSize();
-    this.rect.w = @as(f32, @floatFromInt(ws.w)) * this.oldRatio.w;
-    this.rect.h = @as(f32, @floatFromInt(ws.h)) * this.oldRatio.h;
-    this.rect.x = @as(f32, @floatFromInt(ws.w)) * this.oldRatio.x;
-    this.rect.y = @as(f32, @floatFromInt(ws.h)) * this.oldRatio.y;
-    this.draw();
+pub fn resize(_: *Terminal) void {
+    // const ws = this.window.getSize();
+    // this.rect.w = @as(f32, @floatFromInt(ws.w)) * this.oldRatio.w;
+    // this.rect.h = @as(f32, @floatFromInt(ws.h)) * this.oldRatio.h;
+    // this.rect.x = @as(f32, @floatFromInt(ws.w)) * this.oldRatio.x;
+    // this.rect.y = @as(f32, @floatFromInt(ws.h)) * this.oldRatio.y;
+    // this.draw();
 }
 
 pub fn draw(this: *Terminal) void {
