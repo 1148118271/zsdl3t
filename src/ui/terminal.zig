@@ -115,7 +115,6 @@ pub fn draw(this: *Terminal) void {
         _ = sdl.SDL_RenderTexture(this.window.renderer, texture, null, &textRect);
 
         if (i == this.lines.items.len - 1) {
-            std.debug.print("i == len - 1", .{});
             _ = sdl.SDL_SetRenderDrawColor(this.window.renderer, fg.r, fg.g, fg.b, fg.a);
             _ = sdl.SDL_RenderLine(this.window.renderer, textRect.w + 5, fontY, textRect.w + 5, fontY + textRect.h);
         }

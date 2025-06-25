@@ -31,7 +31,7 @@ pub fn init(allocator: std.mem.Allocator, title: []const u8, w: i32, h: i32) Win
         std.debug.print("SDL_Init Error: {s}\n", .{sdl.SDL_GetError()});
         return Window.Error.TtfInit;
     }
-    const win: ?*sdl.SDL_Window = sdl.SDL_CreateWindow(title.ptr, w, h, sdl.SDL_WINDOW_RESIZABLE);
+    const win: ?*sdl.SDL_Window = sdl.SDL_CreateWindow(title.ptr, w, h, sdl.SDL_WINDOW_HIGH_PIXEL_DENSITY | sdl.SDL_WINDOW_RESIZABLE);
     if (win == null) {
         std.debug.print("SDL_CreateWindow Error: {s}\n", .{sdl.SDL_GetError()});
         sdl.SDL_Quit();
@@ -97,7 +97,7 @@ pub fn close(this: *Window) void {
 pub fn getSize(this: *Window) struct { w: i32, h: i32 } {
     var w: i32 = undefined;
     var h: i32 = undefined;
-    _ = sdl.SDL_GetWindowSize(this.window, &w, &h);
+    _ = sdl.SDL_GetWindowSizeInPixels(this.window, &w, &h);
     return .{
         .w = w,
         .h = h,
