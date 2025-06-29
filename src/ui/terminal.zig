@@ -1,14 +1,15 @@
+pub const Terminal = @This();
+
 const std = @import("std");
 const builtin = @import("builtin");
 const sdl = @import("sdl.zig").sdl;
 const types = @import("types.zig");
+const Allocator = std.mem.Allocator;
 const Widget = @import("widget.zig").Widget;
 const Window = @import("window.zig").Window;
 const FRect = types.FRect;
 const Color = types.Color;
 const Event = types.Event;
-
-pub const Terminal = @This();
 
 window: *Window,
 font: ?*sdl.TTF_Font,
@@ -17,8 +18,19 @@ backgroundColor: Color,
 lines: std.ArrayList([]const u8),
 lineSpace: f32,
 
-pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Terminal {
-    const pixelDensity = window.getPixelDensity();
+const Text = struct {
+    allocator: Allocator,
+    prefix: []const u8,
+    history_lines: std.ArrayList([]const u8),
+    current_line: []const u8,
+
+    // fn init(allocator: Allocator) Text {
+
+    // }
+};
+
+pub fn init(allocator: Allocator, window: *Window, rect: FRect) !Terminal {
+    const scale = window.getDisplayScale();
 
     var lines = std.ArrayList([]const u8).init(allocator);
     try lines.append("PS C:\\Users\\86176> 123");
@@ -33,7 +45,7 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
         },
     };
 
-    const font = sdl.TTF_OpenFont(fontPath, 18 * pixelDensity);
+    const font = sdl.TTF_OpenFont(fontPath, 18 * scale);
     if (font == null) {
         std.debug.print("TTF_OpenFont Error: {s}\n", .{sdl.SDL_GetError()});
         // TODO panic
@@ -44,10 +56,10 @@ pub fn init(allocator: std.mem.Allocator, window: *Window, rect: FRect) !Termina
         .window = window,
         .font = font,
         .rect = .{
-            .x = rect.x * pixelDensity,
-            .y = rect.y * pixelDensity,
-            .w = rect.w * pixelDensity,
-            .h = rect.h * pixelDensity,
+            .x = rect.x * scale,
+            .y = rect.y * scale,
+            .w = rect.w * scale,
+            .h = rect.h * scale,
         },
         .backgroundColor = .{
             .r = 24,
@@ -70,7 +82,7 @@ pub fn resize(_: *Terminal) void {
 }
 
 pub fn draw(this: *Terminal) void {
-    handleType(this.window.event);
+    this.handleType(this.window.event);
     _ = sdl.SDL_SetRenderDrawColor(
         this.window.renderer,
         this.backgroundColor.r,
@@ -115,8 +127,7 @@ pub fn draw(this: *Terminal) void {
         _ = sdl.SDL_RenderTexture(this.window.renderer, texture, null, &textRect);
 
         if (i == this.lines.items.len - 1) {
-            _ = sdl.SDL_SetRenderDrawColor(this.window.renderer, fg.r, fg.g, fg.b, fg.a);
-            _ = sdl.SDL_RenderLine(this.window.renderer, textRect.w + 5, fontY, textRect.w + 5, fontY + textRect.h);
+            this.drawCursor(fontY, textRect.w, textRect.h);
         }
 
         fontY += textRect.h + this.lineSpace;
@@ -138,8 +149,26 @@ pub fn close(this: *Terminal) void {
     this.lines.deinit();
 }
 
-fn handleType(event: Event) void {
+fn drawCursor(this: *Terminal, fontY: f32, fontW: f32, fontH: f32) void {
+    const scale = this.window.getDisplayScale();
+    const rect = FRect{ .x = fontW + 10 * scale, .y = fontY, .w = 2 * scale, .h = fontH };
+    _ = sdl.SDL_SetRenderDrawColor(this.window.renderer, 204, 204, 204, 255);
+    _ = sdl.SDL_RenderFillRect(
+        this.window.renderer,
+        &rect,
+    );
+}
+
+fn handleType(this: *Terminal, event: Event) void {
+    _ = sdl.SDL_StartTextInput(this.window.window);
+    // const inputRect = rect{100, 100, 600, 30};
+    // sdl.SDL_SetTe();
+    // std.debug.print("handletype : {?}", .{event.type});
     switch (event.type) {
+        sdl.SDL_EVENT_TEXT_INPUT => {
+            // const text = this.lines.items[this.lines.items.len - 1];
+            std.debug.print("输入: {s}", .{event.text.text});
+        },
         else => {},
     }
 }

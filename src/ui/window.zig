@@ -1,10 +1,11 @@
+pub const Window = @This();
+
 const std = @import("std");
 const sdl = @import("sdl.zig").sdl;
 const types = @import("types.zig");
 const Widget = @import("widget.zig").Widget;
 const Color = types.Color;
 const Event = types.Event;
-pub const Window = @This();
 
 pub const Error = error{
     SdlInit,
@@ -104,8 +105,8 @@ pub fn getSize(this: *Window) struct { w: i32, h: i32 } {
     };
 }
 
-pub fn getPixelDensity(this: *Window) f32 {
-    return sdl.SDL_GetWindowPixelDensity(this.window);
+pub fn getDisplayScale(this: *Window) f32 {
+    return sdl.SDL_GetWindowDisplayScale(this.window);
 }
 
 fn renderColor(this: *Window) void {
